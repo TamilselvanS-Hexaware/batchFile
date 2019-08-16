@@ -1,0 +1,11 @@
+curl  -w "%{http_code}" -I -s >status_code_temp --cookie cookies.txt --cookie-jar cookies.txt -s -L -v http://localhost:8080/jumbo/jumboAPICall/%projName%/%testName% -H "Content-Type: application/octet-stream" -H "Content-Transfer-Encoding: Binary" -o %projName%_%testName%_%testID%.pdf
+del cookies.txt
+
+ -H "Content-Type: application/octet-stream" -H "Content-Transfer-Encoding: Binary" -o %projName%_%testName%_%testID%.pdf
+
+ -H "Content-Type: application/octet-stream" -H "Content-Transfer-Encoding: Binary" -o %projName%_%testName%_%testID%.pdf
+
+
+batch or test case execution:
+do u want exec test Y/N? Y
+do u want to exec ts/batch ||?

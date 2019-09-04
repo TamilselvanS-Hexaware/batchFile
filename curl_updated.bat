@@ -116,7 +116,20 @@ EXIT
 set testName=parallelRun
 set boolBatch=yes
 curl --cookie-jar cookies.txt -L --data "secret=secret_password" --header "Content-Type: application/x-www-form-urlencoded" --request POST --data "username=administrator&password=Password123" http://%ipaddr%:8080/jumbo/login
+echo ----------------------
+echo Running test Case...
+echo ----------------------
 curl -# --cookie cookies.txt --cookie-jar cookies.txt -is "http://%ipaddr%:8080/jumbo/jumboAPICall/%projName%/%testName%/%boolBatch%/%batchName%" -o jumboTemp.txt
+findstr /B "Parallel run completed successfully..." jumboTemp.txt >tempVal
+IF EXIST tempVal (set /p "valFound="<tempVal)
+set condVal=Parallel run completed successfully...
+IF "%valFound%" == "%condVal% " (GOTO:batch200)
+findstr /B "HTTP/1.1 500" jumboTemp.txt >tempVal
+IF EXIST tempVal (set /p "valFound="<tempVal)
+set condVal=HTTP/1.1 500
+IF "%valFound%" == "%condVal% " (GOTO:batch500)
+PAUSE
+EXIT
 PAUSE
 EXIT
 
@@ -160,9 +173,9 @@ IF EXIST tempVal (set /p "valFound="<tempVal)
 set condVal=Test cases are already running in the stack... wait for some time...
 IF "%valFound%" == "%condVal% " (GOTO:err_output)
 
-findstr /B "All test cases executed successfully..." jumboTemp.txt >tempVal
+findstr /B "Test parallel run completed successfully..." jumboTemp.txt >tempVal
 IF EXIST tempVal (set /p "valFound="<tempVal)
-set condVal=All test cases executed successfully...
+set condVal=Test parallel run completed successfully...
 IF "%valFound%" == "%condVal% " (GOTO:parallel200)
 
 findstr /B "HTTP/1.1 200" jumboTemp.txt >tempVal
@@ -184,9 +197,47 @@ cls
 echo ---------------------------------------------------------------------
 echo %valFound%
 echo ---------------------------------------------------------------------
+echo ---------------------------------------------------------------
+echo Downloading PDF reports for the executed test cases in parallel...
+echo ---------------------------------------------------------------
+cd >> pathfile
+set /p pathVal=<pathfile
+for /f "skip=17 delims=*" %%a in (%pathVal%\jumboTemp.txt) do (
+echo %%a >>%pathVal%\newfile.txt
+)
+xcopy %pathVal%\newfile.txt %pathVal%\jumboTemp.txt /y >nul
+del %pathVal%\newfile.txt
+setlocal enabledelayedexpansion
+for /F "usebackq" %%a in ("%pathVal%\jumboTemp.txt") do (
+IF "%%a" == "txt" (
+CALL :txt
+) ELSE IF "%%a" == "jsonvsjson" (
+CALL :jsonvsjson
+) ELSE IF "%%a" == "xmlvsxml" ( 
+CALL :xmlvsxml
+) ELSE (
+curl --cookie-jar cookies.txt -L --data "secret=secret_password" --header "Content-Type: application/x-www-form-urlencoded" --request POST --data "username=administrator&password=Password123" http://%ipaddr%:8080/jumbo/login
+curl -# --cookie cookies.txt --cookie-jar cookies.txt -is -H "Content-Type: application/json"  "http://%ipaddr%:8080/jumbo/downloadPDF/%projName%/%%a/!fileType!" -o %%a.pdf
+)
+)
+endlocal
+)
+del jumboTemp.txt
+del pathfile
+del tempVal
 del cookies.txt
-PAUSE
+msg * PDF reports downloaded successfully!!! in this path %pathVal%
 EXIT
+
+:txt
+set "fileType=csv"
+goto :EOF
+:jsonvsjson
+set "fileType=jsonvsjson"
+goto :EOF
+:xmlvsxml
+set "fileType=xmlvsxml"
+goto :EOF
 
 :parallel500
 cls

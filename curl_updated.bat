@@ -80,7 +80,9 @@ set condVal=HTTP/1.1 500
 IF "%valFound%" == "%condVal% " (GOTO:500) ELSE (GOTO:200)
 
 :200
+echo --------------------------
 echo Test executed successfully
+echo --------------------------
 set testID=%mydate%%HH%%MI%%SS%%MS%
 ren jumboTemp.txt %projName%_%testName%_%testID%.pdf
 IF EXIST tempVal (del tempVal)
@@ -261,6 +263,16 @@ echo %%a >>%pathVal%\newfile.txt
 )
 xcopy %pathVal%\newfile.txt %pathVal%\jumboTemp.txt /y >nul
 del %pathVal%\newfile.txt
+
+For /f "tokens=2-4 delims=/ " %%a in ('date /t') do (set mydate=%%c%%a%%b)
+For /f "tokens=1-2 delims=/:" %%a in ("%TIME%") do (set mytime=%%a%%b)
+set HH=%TIME: =0%
+set HH=%HH:~0,2%
+set MI=%TIME:~3,2%
+set SS=%TIME:~6,2%
+set MS=%TIME:~9,3%
+set testID=%mydate%%HH%%MI%%SS%%MS%
+
 setlocal enabledelayedexpansion
 for /F "usebackq" %%a in ("%pathVal%\jumboTemp.txt") do (
 IF "%%a" == "otherfiletype" (
@@ -272,6 +284,7 @@ CALL :xmlvsxml
 ) ELSE (
 curl --cookie-jar cookies.txt -L --data "secret=secret_password" --header "Content-Type: application/x-www-form-urlencoded" --request POST --data "username=administrator&password=Password123" http://%ipaddr%:8080/jumbo/login
 curl -# --cookie cookies.txt --cookie-jar cookies.txt -is -H "Content-Type: application/json"  "http://%ipaddr%:8080/jumbo/downloadPDF/%projName%/%%a/!fileType!" -o %%a.pdf
+ren %%a.pdf %projName%_%%a_%testID%.pdf
 )
 )
 endlocal

@@ -281,10 +281,10 @@ del pathfile
 del tempVal
 del cookies.txt
 msg * PDF reports downloaded successfully!!! in this path %pathVal%
-EXIT
+GOTO :Test_runType
 
 :otherfiletype
-set "fileType="
+set "fileType=other"
 goto :EOF
 :jsonvsjson
 set "fileType=jsonvsjson"

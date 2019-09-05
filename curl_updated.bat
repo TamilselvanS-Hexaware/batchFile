@@ -263,8 +263,8 @@ xcopy %pathVal%\newfile.txt %pathVal%\jumboTemp.txt /y >nul
 del %pathVal%\newfile.txt
 setlocal enabledelayedexpansion
 for /F "usebackq" %%a in ("%pathVal%\jumboTemp.txt") do (
-IF "%%a" == "txt" (
-CALL :txt
+IF "%%a" == "otherfiletype" (
+CALL :otherfiletype
 ) ELSE IF "%%a" == "jsonvsjson" (
 CALL :jsonvsjson
 ) ELSE IF "%%a" == "xmlvsxml" ( 
@@ -283,8 +283,8 @@ del cookies.txt
 msg * PDF reports downloaded successfully!!! in this path %pathVal%
 EXIT
 
-:txt
-set "fileType=csv"
+:otherfiletype
+set "fileType="
 goto :EOF
 :jsonvsjson
 set "fileType=jsonvsjson"

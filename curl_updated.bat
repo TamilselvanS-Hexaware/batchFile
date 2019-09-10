@@ -42,6 +42,9 @@ set MI=%TIME:~3,2%
 set SS=%TIME:~6,2%
 set MS=%TIME:~9,3%
 curl --cookie-jar cookies.txt -L --data "secret=secret_password" --header "Content-Type: application/x-www-form-urlencoded" --request POST --data "username=administrator&password=Password123" http://%ipaddr%:8080/jumbo/login
+echo ----------------------
+echo Running test Case...
+echo ----------------------
 curl -# --cookie cookies.txt --cookie-jar cookies.txt -H "Content-Type: application/octet-stream" -H "Content-Transfer-Encoding: Binary" -is "http://%ipaddr%:8080/jumbo/jumboAPICall/%projName%/%testName%/%boolBatch%/%batchName%" -o jumboTemp.txt
 findstr /B "HTTP/1.1 500" jumboTemp.txt >tempVal
 IF EXIST tempVal (set /p "valFound="<tempVal)
@@ -57,6 +60,7 @@ ren jumboTemp.txt %projName%_%testName%_%testID%.pdf
 IF EXIST tempVal (del tempVal)
 del cookies.txt
 PAUSE
+cls
 GOTO :Test_runType
 
 
@@ -109,7 +113,6 @@ set MI=%TIME:~3,2%
 set SS=%TIME:~6,2%
 set MS=%TIME:~9,3%
 set testID=%mydate%%HH%%MI%%SS%%MS%
-
 setlocal enabledelayedexpansion
 set /a incrementer = 0
 for /F "usebackq" %%a in ("%pathVal%\jumboTemp.txt") do (
@@ -141,12 +144,14 @@ del cookies.txt
 set /a incrementerTest = 0
 for /F "usebackq" %%a in ("%pathVal%\TestNameList.txt") do (
 set /a incrementerTest=incrementerTest+1
-ren %batchName%_!incrementerTest!.pdf %batchName%_%%a_%testID%.pdf
+ren %batchName%_!incrementerTest!.pdf %projName%_%%a_%testID%.pdf
 )
 del %pathVal%\TestNameList.txt
 del pathfile
 endlocal
 msg * PDF reports downloaded successfully!!! in this path %pathVal%
+PAUSE
+cls
 GOTO :Test_runType
 
 :otherfiletype

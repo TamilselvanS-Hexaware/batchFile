@@ -1,5 +1,5 @@
 @echo off
-set /p ipaddr=Enter IP Address:
+set /p ipaddr=Enter Server IP Address:
 :Test_runType
 set /p runType=For batch run press(B) For test run press(T):
 IF "%runType%" == "b" (
@@ -45,7 +45,7 @@ curl --cookie-jar cookies.txt -L --data "secret=secret_password" --header "Conte
 echo ----------------------
 echo Running test Case...
 echo ----------------------
-curl -# --cookie cookies.txt --cookie-jar cookies.txt -H "Content-Type: application/octet-stream" -H "Content-Transfer-Encoding: Binary" -is "http://%ipaddr%:8080/jumbo/jumboAPICall/%projName%/%testName%/%boolBatch%/%batchName%" -o jumboTemp.txt
+curl -# --cookie cookies.txt --cookie-jar cookies.txt -H "Content-Type: application/octet-stream" -H "Content-Transfer-Encoding: Binary" -is "http://%ipaddr%:8080/jumbo/jumboAPICall/%projName%/%testName%/%batchName%/%boolBatch%" -o jumboTemp.txt
 findstr /B "HTTP/1.1 500" jumboTemp.txt >tempVal
 IF EXIST tempVal (set /p "valFound="<tempVal)
 set condVal=HTTP/1.1 500
@@ -73,10 +73,10 @@ GOTO:Test_runType
 set testName=batchRun
 set boolBatch=yes
 curl --cookie-jar cookies.txt -L --data "secret=secret_password" --header "Content-Type: application/x-www-form-urlencoded" --request POST --data "username=administrator&password=Password123" http://%ipaddr%:8080/jumbo/login
-echo ----------------------
-echo Running test Case...
-echo ----------------------
-curl -# --cookie cookies.txt --cookie-jar cookies.txt -is "http://%ipaddr%:8080/jumbo/jumboAPICall/%projName%/%testName%/%boolBatch%/%batchName%" -o jumboTemp.txt
+echo ------------------------------
+echo Running test Cases in Batch...
+echo ------------------------------
+curl -# --cookie cookies.txt --cookie-jar cookies.txt -is "http://%ipaddr%:8080/jumbo/jumboAPICall/%projName%/%testName%/%batchName%/%boolBatch%" -o jumboTemp.txt
 findstr /B "Batch run completed successfully..." jumboTemp.txt >tempVal
 IF EXIST tempVal (set /p "valFound="<tempVal)
 set condVal=Batch run completed successfully...
@@ -85,7 +85,6 @@ findstr /B "HTTP/1.1 500" jumboTemp.txt >tempVal
 IF EXIST tempVal (set /p "valFound="<tempVal)
 set condVal=HTTP/1.1 500
 IF "%valFound%" == "%condVal% " (GOTO:batch500)
-PAUSE
 EXIT
 
 
